@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruleta de Premio | Appix</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage" aria-label="Ruleta para elegir ganador">
+        <div class="brand-bar">
+          <p class="brand-mark">Appix</p>
+          <p class="event-label">Premio especial</p>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Sorteo de participantes</p>
+          <h1>Gira la ruleta y descubre al ganador</h1>
+        </div>
+
+        <div class="roulette-layout">
+          <div class="wheel-wrap">
+            <div class="pointer" aria-hidden="true"></div>
+            <svg class="wheel" viewBox="-240 -240 480 480" role="img" aria-labelledby="wheelTitle wheelDesc">
+              <title id="wheelTitle">Ruleta con participantes</title>
+              <desc id="wheelDesc">Cada sección representa una persona participante del sorteo.</desc>
+              <defs>
+                <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <radialGradient id="hubGradient" cx="42%" cy="36%" r="64%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="44%" stop-color="#d8e4f8" />
+                  <stop offset="100%" stop-color="#8ea7ce" />
+                </radialGradient>
+                <radialGradient id="bowlGradient" cx="50%" cy="48%" r="56%">
+                  <stop offset="0%" stop-color="#24446f" />
+                  <stop offset="70%" stop-color="#142d53" />
+                  <stop offset="100%" stop-color="#07162c" />
+                </radialGradient>
+                <clipPath id="rotorClip">
+                  <circle r="214" />
+                </clipPath>
+              </defs>
+              <circle class="wheel-track" r="230" />
+              <circle class="roulette-bowl" r="214" />
+              <g clip-path="url(#rotorClip)">
+                <g id="wheelGroup"></g>
+              </g>
+              <g id="pinGroup" aria-hidden="true"></g>
+              <circle class="wheel-rim" r="220" />
+              <circle class="wheel-bezel" r="188" />
+              <circle class="wheel-inner-ring" r="94" />
+              <circle class="roulette-ball" cx="36" cy="-203" r="9" />
+              <circle class="hub-shadow" r="54" />
+              <circle class="hub" r="46" />
+              <text class="hub-text" x="0" y="-5" text-anchor="middle">CLICK</text>
+              <text class="hub-subtext" x="0" y="16" text-anchor="middle">PARA GIRAR</text>
+            </svg>
+          </div>
+
+          <aside class="control-panel" aria-live="polite">
+            <div class="winner-display">
+              <span class="display-label">Ganador</span>
+              <strong id="winnerName">Listo para girar</strong>
+            </div>
+            <button id="spinButton" class="spin-button" type="button">
+              <span class="button-shine"></span>
+              <span class="button-label">Elegir ganador</span>
+            </button>
+            <button id="resetButton" class="ghost-button" type="button">Reiniciar</button>
+            <p id="statusText" class="status-text">24 participantes cargados</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="participants" aria-label="Lista de participantes">
+        <div class="section-heading">
+          <p>Participantes</p>
+          <span>24 nombres</span>
+        </div>
+        <ul id="participantList"></ul>
+      </section>
+    </main>
+
+    <div id="celebration" class="celebration" aria-hidden="true"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
