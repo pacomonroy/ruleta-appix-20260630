@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ruleta de Premio | Appix</title>
+    <style>
+:root {
+  --navy-950: #07162c;
+  --navy-900: #0d1f3d;
+  --navy-800: #172f58;
+  --blue-700: #263f72;
+  --blue-500: #49699f;
+  --blue-300: #8da8d0;
+  --cyan-300: #95d8ff;
+  --gold-400: #f7c95f;
+  --white: #fff;
+  --muted: #cbd7eb;
+  --glass: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.2);
+  color-scheme: dark;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--white);
+  background:
+    radial-gradient(circle at 74% 8%, rgba(91, 119, 174, 0.42), transparent 32rem),
+    radial-gradient(circle at 18% 80%, rgba(48, 77, 129, 0.52), transparent 28rem),
+    linear-gradient(135deg, var(--navy-950), var(--navy-800) 54%, var(--navy-900));
+}
+
+body::before,
+body::after {
+  position: fixed;
+  z-index: -1;
+  width: 44rem;
+  height: 16rem;
+  pointer-events: none;
+  content: "";
+  border-radius: 50%;
+  opacity: 0.28;
+  background:
+    repeating-radial-gradient(
+      ellipse at center,
+      transparent 0 9px,
+      rgba(210, 229, 255, 0.76) 10px 12px,
+      transparent 13px 20px
+    );
+  filter: blur(0.2px);
+}
+
+body::before {
+  top: -4rem;
+  left: -16rem;
+  transform: rotate(58deg);
+}
+
+body::after {
+  right: -12rem;
+  bottom: 4rem;
+  transform: rotate(-16deg);
+}
+
+button {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.stage {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: clamp(18px, 3vw, 34px);
+}
+
+.brand-mark {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.brand-mark::after {
+  width: 31px;
+  height: 31px;
+  content: "";
+  border: 3px solid rgba(255, 255, 255, 0.92);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, var(--white) 0 4px, transparent 5px),
+    radial-gradient(circle at 50% 8%, var(--white) 0 3px, transparent 4px),
+    radial-gradient(circle at 88% 50%, var(--white) 0 3px, transparent 4px),
+    radial-gradient(circle at 50% 92%, var(--white) 0 3px, transparent 4px),
+    radial-gradient(circle at 12% 50%, var(--white) 0 3px, transparent 4px);
+  box-shadow: 0 0 22px rgba(149, 216, 255, 0.24);
+}
+
+.event-label,
+.eyebrow,
+.display-label,
+.section-heading span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.event-label,
+.eyebrow {
+  margin: 0;
+}
+
+.hero-copy {
+  max-width: 760px;
+  margin-bottom: clamp(18px, 4vw, 38px);
+}
+
+h1 {
+  max-width: 760px;
+  margin: 8px 0 0;
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  line-height: 0.92;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.roulette-layout {
+  display: grid;
+  grid-template-columns: minmax(310px, 620px) minmax(270px, 360px);
+  align-items: center;
+  gap: clamp(28px, 6vw, 70px);
+}
+
+.wheel-wrap {
+  position: relative;
+  width: min(100%, 620px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.wheel-wrap::before {
+  position: absolute;
+  inset: 5%;
+  content: "";
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(149, 216, 255, 0.14), transparent 62%),
+    conic-gradient(from 0deg, rgba(255, 255, 255, 0.18), transparent 18%, rgba(255, 255, 255, 0.14), transparent 40%);
+  filter: blur(16px);
+  animation: auraPulse 2.8s ease-in-out infinite;
+}
+
+.wheel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.38));
+}
+
+.wheel-wrap.is-spinning .pointer {
+  animation: pointerTick 0.12s linear infinite;
+}
+
+.pointer {
+  position: absolute;
+  top: 1.5%;
+  left: 50%;
+  z-index: 3;
+  width: clamp(38px, 7vw, 58px);
+  height: clamp(48px, 9vw, 72px);
+  transform: translateX(-50%);
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+  background: linear-gradient(180deg, #fff4c8, var(--gold-400) 62%, #d09129);
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35));
+}
+
+.wheel-track {
+  fill: rgba(255, 255, 255, 0.055);
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-width: 2;
+}
+
+.roulette-bowl {
+  fill: url("#bowlGradient");
+}
+
+.slice {
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 1.1;
+}
+
+.slice:nth-child(4n + 1) {
+  filter: url("#softGlow");
+}
+
+.name-label {
+  fill: var(--white);
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  paint-order: stroke;
+  stroke: rgba(7, 22, 44, 0.72);
+  stroke-width: 2.8px;
+  stroke-linejoin: round;
+}
+
+.pocket-line {
+  stroke: rgba(255, 255, 255, 0.42);
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.pin {
+  fill: #f5f8ff;
+  stroke: rgba(7, 22, 44, 0.36);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.34));
+}
+
+.wheel-rim,
+.wheel-bezel,
+.roulette-ball,
+.wheel-inner-ring {
+  fill: none;
+  pointer-events: none;
+}
+
+.wheel-rim {
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 9;
+}
+
+.wheel-bezel {
+  stroke: rgba(247, 201, 95, 0.54);
+  stroke-dasharray: 2 10;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+
+.wheel-inner-ring {
+  stroke: rgba(255, 255, 255, 0.46);
+  stroke-width: 5;
+}
+
+.roulette-ball {
+  fill: #f9fbff;
+  stroke: rgba(255, 255, 255, 0.9);
+  stroke-width: 2;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.42));
+}
+
+.hub-shadow {
+  fill: rgba(3, 10, 24, 0.42);
+}
+
+.hub {
+  fill: url("#hubGradient");
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 4;
+}
+
+.hub-text {
+  fill: var(--navy-950);
+  font-size: 16px;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+}
+
+.hub-subtext {
+  fill: var(--blue-700);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.control-panel {
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.winner-display {
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.winner-display strong {
+  min-height: 4.8rem;
+  color: var(--white);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.spin-button,
+.ghost-button {
+  width: 100%;
+  min-height: 58px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--navy-950);
+  cursor: pointer;
+}
+
+.spin-button {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold-400), #fff1ba 48%, var(--cyan-300));
+  box-shadow: 0 16px 34px rgba(149, 216, 255, 0.18);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.button-shine {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: shine 2.6s ease-in-out infinite;
+}
+
+.button-label {
+  position: relative;
+  z-index: 1;
+}
+
+.spin-button:hover {
+  transform: translateY(-1px);
+}
+
+.spin-button:disabled {
+  cursor: wait;
+  opacity: 0.76;
+}
+
+.ghost-button {
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: var(--white);
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 850;
+}
+
+.status-text {
+  min-height: 1.5rem;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.participants {
+  padding: 26px 0 10px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-heading p {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+#participantList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#participantList li {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 8px;
+  color: #eef5ff;
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.94rem;
+  line-height: 1.15;
+}
+
+#participantList li.is-winner {
+  border-color: rgba(247, 201, 95, 0.9);
+  background: rgba(247, 201, 95, 0.18);
+  box-shadow: 0 0 0 1px rgba(247, 201, 95, 0.24);
+}
+
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 18px;
+  border-radius: 2px;
+  animation: confettiFall var(--fall-time) cubic-bezier(0.12, 0.62, 0.38, 1) forwards;
+}
+
+@keyframes auraPulse {
+  0%,
+  100% {
+    transform: scale(0.98);
+    opacity: 0.72;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes shine {
+  0%,
+  48% {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  78%,
+  100% {
+    transform: translateX(120%) skewX(-18deg);
+  }
+}
+
+@keyframes pointerTick {
+  0%,
+  100% {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  50% {
+    transform: translateX(-50%) rotate(5deg);
+  }
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--drift), calc(100vh + 80px), 0) rotate(var(--spin));
+    opacity: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .stage {
+    min-height: auto;
+    padding-top: 8px;
+  }
+
+  .brand-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roulette-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .control-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    width: min(100% - 20px, 1180px);
+  }
+
+  h1 {
+    font-size: clamp(2rem, 12vw, 3.4rem);
+  }
+
+  .winner-display strong {
+    font-size: 1.55rem;
+  }
+
+  .name-label {
+    font-size: 7.8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage" aria-label="Ruleta para elegir ganador">
+        <div class="brand-bar">
+          <p class="brand-mark">Appix</p>
+          <p class="event-label">Premio especial</p>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">Sorteo de participantes</p>
+          <h1>Gira la ruleta y descubre al ganador</h1>
+        </div>
+
+        <div class="roulette-layout">
+          <div class="wheel-wrap">
+            <div class="pointer" aria-hidden="true"></div>
+            <svg class="wheel" viewBox="-240 -240 480 480" role="img" aria-labelledby="wheelTitle wheelDesc">
+              <title id="wheelTitle">Ruleta con participantes</title>
+              <desc id="wheelDesc">Cada sección representa una persona participante del sorteo.</desc>
+              <defs>
+                <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <radialGradient id="hubGradient" cx="42%" cy="36%" r="64%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="44%" stop-color="#d8e4f8" />
+                  <stop offset="100%" stop-color="#8ea7ce" />
+                </radialGradient>
+                <radialGradient id="bowlGradient" cx="50%" cy="48%" r="56%">
+                  <stop offset="0%" stop-color="#24446f" />
+                  <stop offset="70%" stop-color="#142d53" />
+                  <stop offset="100%" stop-color="#07162c" />
+                </radialGradient>
+                <clipPath id="rotorClip">
+                  <circle r="214" />
+                </clipPath>
+              </defs>
+              <circle class="wheel-track" r="230" />
+              <circle class="roulette-bowl" r="214" />
+              <g clip-path="url(#rotorClip)">
+                <g id="wheelGroup"></g>
+              </g>
+              <g id="pinGroup" aria-hidden="true"></g>
+              <circle class="wheel-rim" r="220" />
+              <circle class="wheel-bezel" r="188" />
+              <circle class="wheel-inner-ring" r="94" />
+              <circle class="roulette-ball" cx="36" cy="-203" r="9" />
+              <circle class="hub-shadow" r="54" />
+              <circle class="hub" r="46" />
+              <text class="hub-text" x="0" y="-5" text-anchor="middle">CLICK</text>
+              <text class="hub-subtext" x="0" y="16" text-anchor="middle">PARA GIRAR</text>
+            </svg>
+          </div>
+
+          <aside class="control-panel" aria-live="polite">
+            <div class="winner-display">
+              <span class="display-label">Ganador</span>
+              <strong id="winnerName">Listo para girar</strong>
+            </div>
+            <button id="spinButton" class="spin-button" type="button">
+              <span class="button-shine"></span>
+              <span class="button-label">Elegir ganador</span>
+            </button>
+            <button id="resetButton" class="ghost-button" type="button">Reiniciar</button>
+            <p id="statusText" class="status-text">24 participantes cargados</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="participants" aria-label="Lista de participantes">
+        <div class="section-heading">
+          <p>Participantes</p>
+          <span>24 nombres</span>
+        </div>
+        <ul id="participantList"></ul>
+      </section>
+    </main>
+
+    <div id="celebration" class="celebration" aria-hidden="true"></div>
+    <script>
+const participants = [
+  "Alejandro Castellanos Arriola",
+  "Alejandro De La Rosa Nolasco",
+  "Araceli Alvarado Cervantes",
+  "Carlos Luis De la Torre",
+  "CESAR ALEJANDRO VALVERDE BAQUEDANO",
+  "CESAR ESTEBAN DEL ANGEL VARGAS",
+  "Christian Diaz",
+  "Elizabeth Juárez",
+  "Héctor Lavín Ríos",
+  "Israel Ceron Martinez",
+  "Jesús Cubillo",
+  "Juan Alberto Vazquez",
+  "Juan Jafet Monterrubio Delgado",
+  "Lety Castellanos",
+  "Marcos Muñoz",
+  "María Graciela Sánchez Maldonado",
+  "MARTIN URRUTIA",
+  "Mary Gabriela Suarez Hurtado",
+  "Paulina Elizabeth Varela",
+  "Rocío Guadalupe Salinas Mandujano",
+  "Rodrigo Cruz Pérez",
+  "ROSA MARIA ALONZO MORA",
+  "SAMMY NAÍ GAMBOA ZÁRATE",
+  "Vanessa Lavin Rios",
+];
+
+const palette = [
+  "#10284f",
+  "#244371",
+  "#365a8f",
+  "#5578ad",
+  "#83a7d4",
+  "#1d385f",
+  "#2e4e82",
+  "#6f90bd",
+];
+
+const wheelWrap = document.querySelector(".wheel-wrap");
+const wheelGroup = document.querySelector("#wheelGroup");
+const pinGroup = document.querySelector("#pinGroup");
+const participantList = document.querySelector("#participantList");
+const winnerName = document.querySelector("#winnerName");
+const spinButton = document.querySelector("#spinButton");
+const resetButton = document.querySelector("#resetButton");
+const statusText = document.querySelector("#statusText");
+const celebration = document.querySelector("#celebration");
+
+const radius = 212;
+const innerPocketRadius = 94;
+const labelRadius = 154;
+const pocketLineStart = innerPocketRadius;
+const pocketLineEnd = radius;
+const pinRadius = 221;
+const slice = 360 / participants.length;
+let currentRotation = 0;
+let activeIndex = -1;
+let isSpinning = false;
+let spinFrame = 0;
+
+function polarToCartesian(angle, distance) {
+  const radians = (angle * Math.PI) / 180;
+  return {
+    x: Math.cos(radians) * distance,
+    y: Math.sin(radians) * distance,
+  };
+}
+
+function createSlicePath(startAngle, endAngle) {
+  const outerStart = polarToCartesian(startAngle, radius);
+  const outerEnd = polarToCartesian(endAngle, radius);
+  const innerEnd = polarToCartesian(endAngle, innerPocketRadius);
+  const innerStart = polarToCartesian(startAngle, innerPocketRadius);
+  const largeArcFlag = endAngle - startAngle <= 180 ? 0 : 1;
+
+  return [
+    `M ${outerStart.x} ${outerStart.y}`,
+    `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${outerEnd.x} ${outerEnd.y}`,
+    `L ${innerEnd.x} ${innerEnd.y}`,
+    `A ${innerPocketRadius} ${innerPocketRadius} 0 ${largeArcFlag} 0 ${innerStart.x} ${innerStart.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function shortenName(name) {
+  const clean = name.replace(/\s+/g, " ").trim();
+  return clean.length > 24 ? `${clean.slice(0, 22)}...` : clean;
+}
+
+function buildWheel() {
+  participants.forEach((name, index) => {
+    const startAngle = index * slice - 90;
+    const endAngle = startAngle + slice;
+    const middleAngle = startAngle + slice / 2;
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("class", "slice");
+    path.setAttribute("d", createSlicePath(startAngle, endAngle));
+    path.setAttribute("fill", palette[index % palette.length]);
+    path.dataset.index = String(index);
+    wheelGroup.appendChild(path);
+
+    const labelPoint = polarToCartesian(middleAngle, labelRadius);
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    text.setAttribute("class", "name-label");
+    text.setAttribute("x", labelPoint.x);
+    text.setAttribute("y", labelPoint.y);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("dominant-baseline", "middle");
+    text.setAttribute("transform", `rotate(${middleAngle + 90} ${labelPoint.x} ${labelPoint.y})`);
+    text.textContent = shortenName(name);
+    wheelGroup.appendChild(text);
+
+    const linePointA = polarToCartesian(startAngle, pocketLineStart);
+    const linePointB = polarToCartesian(startAngle, pocketLineEnd);
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("class", "pocket-line");
+    line.setAttribute("x1", linePointA.x);
+    line.setAttribute("y1", linePointA.y);
+    line.setAttribute("x2", linePointB.x);
+    line.setAttribute("y2", linePointB.y);
+    wheelGroup.appendChild(line);
+
+    const pinPoint = polarToCartesian(middleAngle, pinRadius);
+    const pin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    pin.setAttribute("class", "pin");
+    pin.setAttribute("cx", pinPoint.x);
+    pin.setAttribute("cy", pinPoint.y);
+    pin.setAttribute("r", index % 2 === 0 ? "4.2" : "3.2");
+    pinGroup.appendChild(pin);
+  });
+
+  renderWheelRotation(0);
+}
+
+function buildParticipantList() {
+  participants.forEach((name, index) => {
+    const item = document.createElement("li");
+    item.textContent = name;
+    item.dataset.index = String(index);
+    participantList.appendChild(item);
+  });
+}
+
+function getRandomIndex(max) {
+  const values = new Uint32Array(1);
+  crypto.getRandomValues(values);
+  return values[0] % max;
+}
+
+function normalizeDegrees(value) {
+  return ((value % 360) + 360) % 360;
+}
+
+function renderWheelRotation(rotation) {
+  wheelGroup.setAttribute("transform", `rotate(${rotation} 0 0)`);
+}
+
+function easeOutQuart(progress) {
+  return 1 - (1 - progress) ** 4;
+}
+
+function animateInternalWheel(from, to, duration, onFinish) {
+  const startedAt = performance.now();
+  cancelAnimationFrame(spinFrame);
+
+  function tick(now) {
+    const progress = Math.min((now - startedAt) / duration, 1);
+    const eased = easeOutQuart(progress);
+    renderWheelRotation(from + (to - from) * eased);
+
+    if (progress < 1) {
+      spinFrame = requestAnimationFrame(tick);
+      return;
+    }
+
+    spinFrame = 0;
+    onFinish();
+  }
+
+  spinFrame = requestAnimationFrame(tick);
+}
+
+function highlightWinner(index) {
+  document.querySelectorAll("#participantList li").forEach((item) => {
+    item.classList.toggle("is-winner", Number(item.dataset.index) === index);
+  });
+}
+
+function launchConfetti() {
+  celebration.innerHTML = "";
+  const colors = ["#ffffff", "#f7c95f", "#95d8ff", "#8da8d0", "#49699f"];
+  const pieces = 110;
+
+  for (let index = 0; index < pieces; index += 1) {
+    const piece = document.createElement("span");
+    piece.className = "confetti";
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[index % colors.length];
+    piece.style.setProperty("--drift", `${Math.random() * 280 - 140}px`);
+    piece.style.setProperty("--spin", `${Math.random() * 900 + 360}deg`);
+    piece.style.setProperty("--fall-time", `${Math.random() * 1.7 + 2.2}s`);
+    piece.style.animationDelay = `${Math.random() * 0.35}s`;
+    celebration.appendChild(piece);
+  }
+
+  window.setTimeout(() => {
+    celebration.innerHTML = "";
+  }, 4600);
+}
+
+function spinWheel() {
+  if (isSpinning) return;
+
+  isSpinning = true;
+  activeIndex = getRandomIndex(participants.length);
+  const selectedCenterAngle = activeIndex * slice + slice / 2 - 90;
+  const desiredFinal = normalizeDegrees(-90 - selectedCenterAngle);
+  const currentNormalized = normalizeDegrees(currentRotation);
+  const correction = normalizeDegrees(desiredFinal - currentNormalized);
+  const fullTurns = 6 + getRandomIndex(4);
+  const targetRotation = currentRotation + fullTurns * 360 + correction;
+
+  spinButton.disabled = true;
+  wheelWrap.classList.add("is-spinning");
+  winnerName.textContent = "Girando...";
+  statusText.textContent = "La ruleta está eligiendo al azar";
+  highlightWinner(-1);
+
+  animateInternalWheel(currentRotation, targetRotation, 5400, () => {
+    currentRotation = targetRotation;
+    renderWheelRotation(currentRotation);
+    winnerName.textContent = participants[activeIndex];
+    statusText.textContent = "Ganador seleccionado";
+    highlightWinner(activeIndex);
+    launchConfetti();
+    spinButton.disabled = false;
+    wheelWrap.classList.remove("is-spinning");
+    isSpinning = false;
+  });
+}
+
+function resetWheel() {
+  if (isSpinning) return;
+  currentRotation = 0;
+  activeIndex = -1;
+  cancelAnimationFrame(spinFrame);
+  spinFrame = 0;
+  wheelWrap.classList.remove("is-spinning");
+  renderWheelRotation(0);
+  winnerName.textContent = "Listo para girar";
+  statusText.textContent = `${participants.length} participantes cargados`;
+  highlightWinner(-1);
+  celebration.innerHTML = "";
+}
+
+buildWheel();
+buildParticipantList();
+spinButton.addEventListener("click", spinWheel);
+resetButton.addEventListener("click", resetWheel);
+
+</script>
+  </body>
+</html>
